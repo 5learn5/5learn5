@@ -1,2 +1,2 @@
 # Lamp
-# Lamp
+# Please refer README.pdf 
