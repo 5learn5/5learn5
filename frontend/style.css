@@ -1,0 +1,95 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: black;
+    font-family: poppins, sans-serif;
+    color: white;
+    margin: 0;
+}
+
+/* .ptext {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: white;
+} */
+
+.ptext span {
+    color: red;
+}
+
+.buttons {
+    position: absolute;
+    width: 100px;
+    padding: 1%;
+    font-weight: bold;
+    font-size: large;
+    color: white;
+    background-color: blue;
+    border-radius: 5px;
+}
+
+.wallet {
+    position: absolute;
+    top: 0;
+    right: 0;
+    justify-content: space-around;
+    background-color: black;
+    border-radius: 3px;
+    font-size: small;
+    font-weight: bold;
+    color: white;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+    position: relative;
+    border-radius: 5px;
+    width: 70%;
+    top: calc(10vh);
+    padding: 5%;
+    background-color: green;
+    background: linear-gradient(green, black, green);
+}
+
+.item {
+    padding: 5px;
+    margin: auto;
+    /* horizontally center */
+    color: white;
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    position: relative;
+    width: 40%;
+    height: calc(25vh);
+    min-height: 100%;
+    background: linear-gradient(black, blue);
+}
+
+.ouputText {
+    position: absolute;
+    bottom: 8%;
+    width: auto;
+    left: 38%;
+    align-content: center;
+}
+
+.history {
+    right: 5px;
+    bottom: 5px;
+}
+
+
+.button-submit {
+    right: 5px;
+    bottom: 5px;
+}
+
+.buttonOnhover:hover {
+    color: black;
+    box-shadow: 5px rgba(7, 7, 7, 0.022);
+}

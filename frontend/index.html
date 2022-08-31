@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.43.1/dist/near-api-js.min.js"></script>
+</head>
+
+<body>
+  <!--  <button>Login</button> -->
+  <!--  <button id="button_wallet" class="button_wallet buttonOnhover">Login</button> -->
+  <nav>
+    <a href="About.html">Read</a>
+    <a href="Update.html">Update</a>
+    <a href="Read.html">Read</a>
+  </nav>
+  <div class="root">
+    <div class="wallet" id="wallet">
+      <button id="connect" class="buttonOnhover">Connect</button>
+      <h3 id="contractName" class="ptext"></span></h3>
+    </div>
+    <div class="container">
+      <div class="lamp item" id="lamp_item">
+        <h3 class="Customer-h3">Lamp</h3>
+        <select id="selectLamp">
+          <option>Choose a Lamp</option>
+        </select>
+        <button id="history" class="history buttons buttonOnhover">History</button>
+      </div>
+
+      <div class="operation item">
+        <h3 class="Operation-h3">Operations</h3>
+        <input type="radio" id="Enable" name="opt" value="Enable" />
+        <label htmlFor="Enable">Enable</label>
+        <input type="radio" id="On" name="opt" value="On" />
+        <label HTMLFor="On">On</label>
+        <br />
+        <input type="radio" id="Disable" name="opt" value="Disable" />
+        <label HTMLFor="Disable">Disable</label>
+        <input type="radio" id="Off" name="opt" value="Off" />
+        <label HTMLFor="Off">Off</label>
+      </div>
+
+      <div class="submit">
+        <button id="submit" class="button-submit buttons buttonOnhover" onclick="submit()">Submit</button>
+      </div>
+    </div>
+  </div>
+  <textarea id="ouputText" name="ouputText" class="ouputText" rows="4" cols="50">Output.. </textarea>
+</body>
+<script src="index.js"></script>
+
+</html>

@@ -1,10 +1,11 @@
 mod tests {
-    #![allow(dead_code, unused_variables, unused_imports, non_snake_case)]
-    use crate::{Contract, SEC_PER_HOUR, SEC_PER_DAY, NANO_POW};
 
+    #![allow(dead_code, unused_variables, unused_imports, non_snake_case)]
     use super::*;
+    use crate::utils::utils::{NANO_POW, SEC_PER_DAY, SEC_PER_HOUR};
+    use crate::{utils::utils::*, Contract};
     use near_sdk::test_utils::{get_logs, VMContextBuilder};
-    use near_sdk::{assert_self, testing_env, MockedBlockchain, VMContext, env};
+    use near_sdk::{assert_self, env, testing_env, MockedBlockchain, VMContext};
     use std::convert::TryInto;
     use std::time::{Duration, Instant, SystemTime};
 

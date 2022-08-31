@@ -1,23 +1,10 @@
-//use chrono::{NaiveDateTime,DateTime, Duration, Utc};
-//use chrono::{Timelike, Utc};
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+//use colored::*;
+pub use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+//use near_sdk::env::log;
 use near_sdk::serde::Serialize;
-use near_sdk::{env, log, near_bindgen};
+use near_sdk::{env, log, near_bindgen, Promise};
 use std::collections::HashMap;
-
-const SEC_PER_HOUR: u64 = 60 * 60;
-const SEC_PER_DAY: u64 = 24 * SEC_PER_HOUR;
-const NANO_POW: u64 = u64::pow(10, 9);
-
-const HALO_RATE_PER_SEC: f64 = 0.10 / NANO_POW as f64;
-const NEON_RATE_PER_SEC: f64 = 0.05 / NANO_POW as f64;
-
-pub fn get_epoc_hour() -> u32 {
-    let today_time_in_seconds = (env::block_timestamp() / NANO_POW) % SEC_PER_DAY;
-    let today_time_in_hours = today_time_in_seconds / SEC_PER_HOUR;
-    log!("current_time_in_hours (GMT): {} ", today_time_in_hours);
-    today_time_in_hours as u32
-}
+use utils::utils::{get_epoc_hour, HALO_RATE_PER_SEC, NANO_POW, NEON_RATE_PER_SEC};
 
 #[derive(Serialize, BorshDeserialize, BorshSerialize, Debug)]
 pub enum LampType {
@@ -42,7 +29,6 @@ impl Default for LampState {
         LampState::Off
     }
 }
-
 
 #[derive(Serialize, BorshDeserialize, BorshSerialize, Debug)]
 pub struct Lamp {
@@ -88,7 +74,6 @@ pub struct Reward {
 
 #[near_bindgen]
 impl Contract {
-
     #[private]
     pub fn gen_lamp(&self, state: String, ltype: String) -> (u16, Lamp) {
         let new_id: u16 = self.last_id + 1;
@@ -127,12 +112,12 @@ impl Contract {
         self.last_id = id;
         id
     }
-    
+
     pub fn get_count(&self) -> u16 {
         self.last_id
     }
-    
-        // a lamp can not be deleted from blockchain , it can be de-activated only
+
+    // a lamp can not be deleted from blockchain , it can be de-activated only
     #[payable]
     pub fn disable_lamp(&mut self, lamp_id: u16) {
         self.only_owner_allowed();
@@ -163,7 +148,7 @@ impl Contract {
             panic!("No lamp exists for id : {}", lamp_id);
         }
     }
-       
+
     pub fn get_all_lamps(&self) -> &HashMap<u16, Lamp> {
         &self.lamp
     }
@@ -178,24 +163,20 @@ impl Contract {
             if now_hour < self.offtime || now_hour >= self.ontime {
                 return true;
             }
-            log!(
-                "not a time to switch on a lamp"
-            );
+            log!("not a time to switch on a lamp");
             return false;
         } else if new_state == "Off" {
             if now_hour < self.ontime && now_hour >= self.offtime {
                 return true;
             }
-            log!(
-                "not a time to switch off a lamp"
-            );
+            log!("not a time to switch off a lamp");
             return false;
         } else {
             log!("Valid states for a lamp is 'On' or 'Off'");
             return false;
         }
     }
-   
+
     #[payable]
     pub fn set_lamp_state(&mut self, lamp_id: u16, new_state: String) -> bool {
         self.owner_not_allowed();
@@ -256,16 +237,16 @@ impl Contract {
         if env::signer_account_id() == self.owner {
             return;
         }
-        env::panic(b"Only contract owner can invoke this method");
+        env::panic(b"Only Dapp's owner can invoke this method");
     }
 
     pub fn owner_not_allowed(&self) {
         if env::signer_account_id() != self.owner {
             return;
         }
-        env::panic(b"Contract owner can not invoke this method");
-    }  
-    
+        env::panic(b"Dapp's owner can not invoke this method");
+    }
+
     // reward_for can have value Self and All
     pub fn calculate_reward(&self, reward_for: String) -> Option<HashMap<u16, Reward>> {
         if reward_for == "All" {
@@ -278,39 +259,34 @@ impl Contract {
 
         let mut reward_hashmap: HashMap<u16, Reward> = HashMap::new();
 
-        for i in 1..self.get_count() + 1 {
-            match self.get_lamp(i) {
-                None => {
-                    log!("No lamp exists for lamp_id : {}", i);
-                }
-                Some(lamp) => {
-                    let rate = match &lamp.lamp_type {
-                        LampType::Halogen => HALO_RATE_PER_SEC,
-                        LampType::Neon => NEON_RATE_PER_SEC,
-                    };
-
-                    let current_time = env::block_timestamp();
-                    if reward_for == "All" {
-                        if lamp.updated_by != self.owner.to_string() {
-                            let reward = Reward {
-                                reward_to: lamp.updated_by.to_owned(),
-                                current_time,
-                                amount: ((current_time - lamp.updated_on) / NANO_POW) as f64 * rate,
-                            };
-                            reward_hashmap.insert(lamp.lamp_id, reward);
-                        }
-                    } else {
-                        if lamp.updated_by == env::signer_account_id().to_string() {
-                            let reward = Reward {
-                                reward_to: lamp.updated_by.to_owned(),
-                                current_time,
-                                amount: ((current_time - lamp.updated_on) / NANO_POW) as f64 * rate,
-                            };
-                            reward_hashmap.insert(lamp.lamp_id, reward);
-                        }
-                    }
-                }
+        for (id, lamp) in self.lamp.iter() {
+            let rate = match &lamp.lamp_type {
+                LampType::Halogen => HALO_RATE_PER_SEC,
+                LampType::Neon => NEON_RATE_PER_SEC,
             };
+
+            let current_time = env::block_timestamp();
+            if reward_for == "All" {
+                if lamp.updated_by != self.owner.to_string() {
+                    let reward = Reward {
+                        reward_to: lamp.updated_by.to_owned(),
+                        current_time,
+                        amount: ((current_time - lamp.updated_on) / NANO_POW) as f64 * rate,
+                    };
+                    reward_hashmap.insert(*id, reward);
+                }
+            } else {
+                if lamp.updated_by == env::signer_account_id().to_string()
+                    && lamp.updated_by != self.owner.to_string()
+                {
+                    let reward = Reward {
+                        reward_to: lamp.updated_by.to_owned(),
+                        current_time,
+                        amount: ((current_time - lamp.updated_on) / NANO_POW) as f64 * rate,
+                    };
+                    reward_hashmap.insert(*id, reward);
+                }
+            }
         }
 
         if reward_hashmap.is_empty() {
@@ -319,7 +295,35 @@ impl Contract {
             Some(reward_hashmap)
         }
     }
-    
+
+    #[payable]
+    pub fn claim_reward(&mut self) -> (bool, f64) {
+        // no reward for owner
+        self.owner_not_allowed();
+
+        let list = self.calculate_reward(String::from("Self"));
+        if list.is_none() {
+            return (false, 0.0);
+        } else {
+            let mut sum = 0.0;
+            let h = list.unwrap();
+            for (_, j) in h.into_iter() {
+                sum += j.amount;
+            }
+            // Promise::new(env::signer_account_id()).transfer(sum as u128);
+            Promise::new(env::signer_account_id()).transfer(sum as u128);
+            log!(
+                "{}",
+                format!(
+                    "Reward {} yoctoⓃ paid to {} at {}",
+                    sum,
+                    env::signer_account_id(),
+                    env::block_timestamp()
+                )
+            );
+            return (true, sum);
+        };
+    }
 }
 
 // ******************************************************************* //
@@ -328,3 +332,4 @@ impl Contract {
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests;
+mod utils;
